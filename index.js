@@ -18,7 +18,13 @@ const client = new MongoClient(process.env.DB_URL, {
 
 
 // middlewares
-app.use(cors());
+const corsConfig = {
+    origin: '',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+app.use(cors())
+app.options("", cors(corsConfig))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,7 +49,7 @@ const verifyJWT = (req, res, next) => {
 
 async function bootstrap() {
     try {
-        await client.connect();
+        client.connect();
         console.log('Connected to database');
 
         const userCollection = client.db('yoga-school').collection('users');
@@ -258,13 +264,13 @@ async function bootstrap() {
 
 
         // admin routes
-        app.get("/all-classes",verifyJWT,verifyAdmin, async (req, res) => {
+        app.get("/all-classes", verifyJWT, verifyAdmin, async (req, res) => {
             const classes = await classCollection.find().toArray();
             res.send(classes)
         })
         //    update class status to approved
 
-        app.patch("/update-class/:id",verifyJWT,verifyAdmin,  async (req, res) => {
+        app.patch("/update-class/:id", verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const status = req.body.status;
             const query = { _id: new ObjectId(id) };
@@ -278,7 +284,7 @@ async function bootstrap() {
         })
 
         // add feedback to a class
-        app.patch("/add-feedback/:id",verifyJWT,verifyAdmin,  async (req, res) => {
+        app.patch("/add-feedback/:id", verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const feedback = req.body.feedback;
             const query = { _id: new ObjectId(id) };
@@ -292,13 +298,13 @@ async function bootstrap() {
         })
 
         // get all users
-        app.get("/users",verifyJWT,verifyAdmin,  async (req, res) => {
+        app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users);
         })
 
         // update user role
-        app.patch("/update-user/:id",verifyJWT,verifyAdmin,  async (req, res) => {
+        app.patch("/update-user/:id", verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const role = req.body.role;
             const query = { _id: new ObjectId(id) };
